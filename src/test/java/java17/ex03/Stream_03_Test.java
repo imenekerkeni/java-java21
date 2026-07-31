@@ -30,7 +30,8 @@ public class Stream_03_Test {
 		List<Order> orders = new Data().getOrders();
 
 		// TODO Retrouver la commande avec le prix le plus élevé
-		Optional<Order> result = null;
+		Optional<Order> result = orders.stream()
+				.max(Comparator.comparing(Order::getPrice));
 
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get().getPrice(), is(2200.0));
@@ -42,7 +43,8 @@ public class Stream_03_Test {
 		List<Order> orders = new Data().getOrders();
 
 		// TODO Retrouver la commande avec le prix le moins élevé
-		Optional<Order> result = null;
+		Optional<Order> result = orders.stream()
+				.min(Comparator.comparing(Order::getPrice));
 
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get().getPrice(), is(1000.0));
@@ -53,9 +55,11 @@ public class Stream_03_Test {
 
 		List<Customer> customers = new Data().getCustomers();
 
-		// TODO construire une chaîne contenant les prénoms des clients triés et séparés
-		// par le caractère "|"
-		String result = null;
+		// TODO construire une chaîne contenant les prénoms des clients triés et séparés par "|"
+		String result = customers.stream()
+				.map(Customer::getFirstname)
+				.sorted()
+				.collect(joining("|"));
 
 		assertThat(result, is("Alexandra|Cyril|Johnny|Marion|Sophie"));
 	}
@@ -66,7 +70,9 @@ public class Stream_03_Test {
 		List<Order> orders = new Data().getOrders();
 
 		// TODO Extraire la liste des pizzas de toutes les commandes
-		List<Pizza> result = null;
+		List<Pizza> result = orders.stream()
+				.flatMap(o -> o.getPizzas().stream())
+				.toList();
 
 		assertThat(result.size(), is(9));
 	}
@@ -77,7 +83,10 @@ public class Stream_03_Test {
 		List<Order> orders = new Data().getOrders();
 
 		// TODO Extraire la liste des différentes pizzas de toutes les commandes
-		List<Pizza> result = null;
+		List<Pizza> result = orders.stream()
+				.flatMap(o -> o.getPizzas().stream())
+				.distinct()
+				.toList();
 
 		assertThat(result.size(), is(4));
 	}
@@ -87,8 +96,9 @@ public class Stream_03_Test {
 
 		List<Order> orders = new Data().getOrders();
 
-		// TODO construire une Map <Client, Commandes effectuées par le client
-		Map<Customer, List<Order>> result = null;
+		// TODO construire une Map <Client, Commandes effectuées par le client>
+		Map<Customer, List<Order>> result = orders.stream()
+				.collect(groupingBy(Order::getCustomer));
 
 		assertThat(result.size(), is(2));
 		assertThat(result.get(new Customer(1)), hasSize(4));
@@ -100,9 +110,10 @@ public class Stream_03_Test {
 		List<Pizza> pizzas = new Data().getPizzas();
 
 		// TODO Séparer la liste des pizzas en 2 ensembles :
-		// TODO true -> les pizzas dont le nom commence par "L"
-		// TODO false -> les autres
-		Map<Boolean, List<Pizza>> result = null;
+		// true -> les pizzas dont le nom commence par "L"
+		// false -> les autres
+		Map<Boolean, List<Pizza>> result = pizzas.stream()
+				.collect(partitioningBy(p -> p.getName().startsWith("L")));
 
 		assertThat(result.get(true), hasSize(6));
 		assertThat(result.get(false), hasSize(2));
